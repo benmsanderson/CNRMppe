@@ -1,5 +1,7 @@
 # CNRMppe
 Codebase for CNRM ensemble processing
+## PPE files
+ - CFMIP_Lambda.ipynb : Compute Lambda from different CFMIP outputs, different models and different simulations (amip-4xCO2, amip-p4K, amip-future4K).
 ## Processing files 
  - Preprocessing.ipynb : tests
  - Climatology_comparison.ipynb : tests
