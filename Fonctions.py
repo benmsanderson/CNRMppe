@@ -97,6 +97,95 @@ def get_wavg_budget_df(path, filename, variables, start_yr ,drop, year_list):
     #
     return df3
 #
+#............................................................................
+# Function to convert the monthly values into yearly lon/lat values, to compute the radiative budget and 
+# to put them into a dataframe adapted for the plotting part
+
+import xarray as xr
+import numpy as np
+import pandas as pd
+
+def get_3D_xarr(path, filename, variables):
+#    “”"
+#    This function read the netCDF file of monthly data, compute the radiative budget, perform a yearly mean and 
+#    return a dataframe
+#    “”"
+    # First step : download the data into dataframe
+    file = xr.open_mfdataset(path+filename,combine='by_coords')
+    #
+    # Second step : compute the annual average 
+    df = file[variables].mean('time', keep_attrs=True)
+    #
+    return df
+#
+#............................................................................
+# Function to convert the monthly values into yearly lon/lat values, to compute the radiative budget and 
+# to put them into a dataframe adapted for the plotting part
+
+import xarray as xr
+import numpy as np
+import pandas as pd
+
+def get_3D_budget_xarr(path, filename, variables):
+#    “”"
+#    This function read the netCDF file of monthly data, compute the radiative budget, perform a yearly mean and 
+#    return a dataframe
+#    “”"
+    # First step : download the data into dataframe
+    file = xr.open_mfdataset(path+filename,combine='by_coords')
+    #
+    # Second step : compute the annual average 
+    df = file[variables].mean('time', keep_attrs=True)
+    tmp_F = df['rsdt']
+    tmp_H = df['rsut'] + df['rlut']
+    df_N = tmp_F - tmp_H
+    #
+    return df_N
+#
+#............................................................................
+# Function to convert the monthly values into yearly lon/lat values, to compute the SW additions and 
+# to return an Xarray
+
+import xarray as xr
+import numpy as np
+import pandas as pd
+
+def get_3D_SW_xarr(path, filename, variables):
+#    “”"
+#    This function read the netCDF file of monthly data, compute the radiative budget, perform a yearly mean and 
+#    return a dataframe
+#    “”"
+    # First step : download the data into dataframe
+    file = xr.open_mfdataset(path+filename,combine='by_coords')
+    #
+    # Second step : compute the annual average 
+    df = file[variables].mean('time', keep_attrs=True)
+    SW = df['rsdt'] - df['rsut']
+    #
+    return SW
+#
+#............................................................................
+# Function to convert the monthly values into yearly lon/lat values, to compute the LW additions and 
+# to return an Xarray
+
+import xarray as xr
+import numpy as np
+import pandas as pd
+
+def get_3D_LW_xarr(path, filename, variables):
+#    “”"
+#    This function read the netCDF file of monthly data, compute the radiative budget, perform a yearly mean and 
+#    return a dataframe
+#    “”"
+    # First step : download the data into dataframe
+    file = xr.open_mfdataset(path+filename,combine='by_coords')
+    #
+    # Second step : compute the annual average 
+    df = file[variables].mean('time', keep_attrs=True)
+    LW = df['rlut']
+    #
+    return LW
+#
 #...............................................................................
 # PLOT A LINE GRAPH FROM DIFFERENT DATAFRAMES 
 import matplotlib.pyplot as plt
@@ -118,14 +207,15 @@ def plotlines_Xdf(df, y, title, colors, linewidth, xlabel, xmin, xmax, ymin, yma
 # PLOT A LINE GRAPH FROM A UNIQUE DATA FRAME 
 import matplotlib.pyplot as plt
 
-def plotlines_1df(df, y , xmin, xmax, title, colors, xlabel, legend ):
+def plotlines_1df(df, y, title, colors, linewidth, xlabel, xmin, xmax, ymin, ymax, legend):
     ax_model=plt.gca()
     N=len(y)
     i=0
     while i<N:
-            df.plot(y=y[i],kind='line',title=title,legend=True, color=colors[i],ax=ax_model)
+            df.plot(y=y[i],kind='line',title=title,legend=True, color=colors[i],linewidth=linewidth[i],ax=ax_model)
             i = (i+1)
             
+    plt.ylim(ymin, ymax)
     plt.xlim(xmin, xmax)
     plt.xlabel(xlabel)
     ax_model.legend(legend, loc='center left', bbox_to_anchor=(1, 0.5))
@@ -147,6 +237,12 @@ def Deltas_Lambda(result, df_CTL, df, expe_name, n):
         df_tmp=df.iloc[0:i,:]
         Delta_N=(df_tmp['N']-df_CTL_tmp['N']).mean()
         Delta_tas=(df_tmp['tas']-df_CTL_tmp['tas']).mean()
+
+        #if Delta_N_tmp>0:
+        #        Delta_N=Delta_N_tmp*(-1)
+        #else:
+	#        Delta_N=Delta_N_tmp
+
         Lambda=Delta_N/Delta_tas
         Lbda.append(Lambda)
         DN.append(Delta_N)
@@ -159,5 +255,5 @@ def Deltas_Lambda(result, df_CTL, df, expe_name, n):
     result['Lambda_'+expe_name]=Lbda
 
     return result
-#......................................................................................
 #
+#.........................................................................................
